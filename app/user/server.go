@@ -13,6 +13,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const (
+	// Server Shutdown Deadline in ms
+	SHUTDOWN_DEADLINE = 20
+	SERVER_ADDR       = "0.0.0.0:8081"
+)
+
 //App will have logger and middleware in it
 type App struct {
 	mux *mux.Router
@@ -34,21 +40,12 @@ func NewApp() *App {
 		mux: mux.NewRouter(),
 	}
 
-	app.Handle("/", http.HandlerFunc(handler))
+	app.Handle("/", http.HandlerFunc(handlers.handler))
 	app.Handle("/ramil", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(r.URL.Path)
 		w.Write([]byte("Hello" + r.URL.Path))
 	}))
 	return &app
-}
-
-func handler(w http.ResponseWriter, r *http.Request) {
-	for k, v := range r.Header {
-		for _, h := range v {
-			fmt.Println(k, h)
-		}
-
-	}
 }
 
 func main() {
@@ -57,7 +54,7 @@ func main() {
 
 	//Construct your server here
 	s := &http.Server{
-		Addr:    "0.0.0.0:8080",
+		Addr:    SERVER_ADDR,
 		Handler: app,
 	}
 
@@ -80,7 +77,7 @@ func main() {
 		log.Fatal(err)
 	case <-sig:
 		// Create context with timeout
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+		ctx, cancel := context.WithTimeout(context.Background(), SHUTDOWN_DEADLINE*time.Millisecond)
 		defer cancel()
 
 		// Shutdown server gracefully if deadline expires, do the hard close
