@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/ramil600/sensors2/app/user/handlers"
 )
 
 const (
@@ -40,7 +41,7 @@ func NewApp() *App {
 		mux: mux.NewRouter(),
 	}
 
-	app.Handle("/", http.HandlerFunc(handlers.handler))
+	app.Handle("/", http.HandlerFunc(handlers.Myhandler))
 	app.Handle("/ramil", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(r.URL.Path)
 		w.Write([]byte("Hello" + r.URL.Path))

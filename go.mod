@@ -1,4 +1,4 @@
-module github.com/ramil600/sensor2
+module github.com/ramil600/sensors2
 
 go 1.17
 
