@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -10,8 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gorilla/mux"
-	"github.com/ramil600/sensors2/app/user/handlers"
+	"github.com/ramil600/sensors2/business/web"
 )
 
 const (
@@ -20,43 +18,23 @@ const (
 	SERVER_ADDR       = "0.0.0.0:8081"
 )
 
-//App will have logger and middleware in it
-type App struct {
-	mux *mux.Router
-}
-
+/*
 // Handle created for better readability and is a facade for app.mux.Handle
-func (a App) Handle(path string, handler http.Handler) {
+func (a App) Handle(path string, handler web.Handler) {
 	a.mux.Handle(path, handler)
 }
-
-// ServeHTTP is implementation of a http.Handler interface
-func (a *App) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	a.mux.ServeHTTP(w, req)
-}
+*/
 
 // NewApp creates mux router wrapped in App struct, creates some routing
-func NewApp() *App {
-	app := App{
-		mux: mux.NewRouter(),
-	}
-
-	app.Handle("/", http.HandlerFunc(handlers.Myhandler))
-	app.Handle("/ramil", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println(r.URL.Path)
-		w.Write([]byte("Hello" + r.URL.Path))
-	}))
-	return &app
-}
 
 func main() {
 
-	app := NewApp()
+	app := web.NewApp()
 
 	//Construct your server here
 	s := &http.Server{
 		Addr:    SERVER_ADDR,
-		Handler: app,
+		Handler: app, //custom built struct with mux, logger and middleware
 	}
 
 	// Put server in the go routine so that we can catch error from it or signal
