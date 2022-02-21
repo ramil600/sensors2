@@ -7,9 +7,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
-//we will add trace for our application
+//TraceID is custom type for adding the trace to context
 type traceID int
 
+// Handler is custom handler functions in our app that will handle http routes
 type Handler func(ctx context.Context, w http.ResponseWriter, r *http.Request)
 
 //App will have logger and middleware in it
@@ -28,26 +29,15 @@ func NewApp() *App {
 	app := App{
 		mux: mux.NewRouter(),
 	}
-
-	/*
-		app.Handle("/{name}", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			vars := mux.Vars(r)
-			w.Write([]byte("Hello, " + vars["name"]))
-		}))
-
-	*/
 	return &app
 }
 
-// Handle created for better readability and is a facade for app.mux.Handle
+// Handle adds trace info and allows mux to route the traffic with modified context
 func (a App) Handle(path string, handler Handler) {
 	h := func(w http.ResponseWriter, r *http.Request) {
 		var mytrace traceID
 		ctx := context.WithValue(r.Context(), mytrace, "we345-wder23-ewe32")
-
 		handler(ctx, w, r)
-
 	}
-
 	a.mux.HandleFunc(path, h)
 }
