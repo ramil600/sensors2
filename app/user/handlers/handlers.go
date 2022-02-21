@@ -5,7 +5,7 @@ import (
 )
 
 func API() *web.App {
-	app := web.NewApp()
-	app.Handle("/", web.Logger(Myhandler))
+	app := web.NewApp(web.Logger)
+	app.Handle("/", Myhandler)
 	return app
 }
