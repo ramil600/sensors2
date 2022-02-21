@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/ramil600/sensors2/app/user/handlers"
+	_ "github.com/ramil600/sensors2/foundation/web"
 )
 
 const (
