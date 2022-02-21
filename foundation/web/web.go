@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/ramil600/sensors2/app/user/handlers"
+
 	"github.com/ramil600/sensors2/business/mid"
 )
 
