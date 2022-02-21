@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/ramil600/sensors2/app/user/handlers"
+	"github.com/ramil600/sensors2/business/mid"
 )
 
 //we will add trace for our application
@@ -25,12 +26,13 @@ func (a *App) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	a.mux.ServeHTTP(w, req)
 }
 
+// NewApp creates mux router wrapped in App struct, creates some routing
 func NewApp() *App {
 	app := App{
 		mux: mux.NewRouter(),
 	}
 
-	app.Handle("/", handlers.Myhandler)
+	app.Handle("/", mid.Logger(handlers.Myhandler))
 	/*
 		app.Handle("/{name}", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			vars := mux.Vars(r)
@@ -40,13 +42,6 @@ func NewApp() *App {
 	*/
 	return &app
 }
-
-/*
-func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	a.mux.ServeHTTP(w, r)
-}
-*/
 
 // Handle created for better readability and is a facade for app.mux.Handle
 func (a App) Handle(path string, handler Handler) {

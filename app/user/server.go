@@ -25,8 +25,6 @@ func (a App) Handle(path string, handler web.Handler) {
 }
 */
 
-// NewApp creates mux router wrapped in App struct, creates some routing
-
 func main() {
 
 	app := web.NewApp()

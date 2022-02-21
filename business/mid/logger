@@ -1,0 +1,21 @@
+package mid
+
+import (
+	"net/http"
+
+	"github.com/ramil600/sensors2/business/web"
+)
+
+var h web.Handler
+
+func Logger(h web.Handler) web.Handler {
+
+	h := func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+
+		ctx := r.Context()
+
+	}
+
+	return h
+
+}
