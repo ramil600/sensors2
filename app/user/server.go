@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ramil600/sensors2/foundation/web"
+	"github.com/ramil600/sensors2/app/user/handlers"
 )
 
 const (
@@ -27,12 +27,10 @@ func (a App) Handle(path string, handler web.Handler) {
 
 func main() {
 
-	app := web.NewApp()
-
 	//Construct your server here
 	s := &http.Server{
 		Addr:    SERVER_ADDR,
-		Handler: app, //custom built struct with mux, logger and middleware
+		Handler: handlers.API(), //custom built struct with mux, logger and middleware
 	}
 
 	// Put server in the go routine so that we can catch error from it or signal

@@ -5,10 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-
-	"github.com/ramil600/sensors2/app/user/handlers"
-
-	"github.com/ramil600/sensors2/business/mid"
 )
 
 //we will add trace for our application
@@ -33,7 +29,6 @@ func NewApp() *App {
 		mux: mux.NewRouter(),
 	}
 
-	app.Handle("/", mid.Logger(handlers.Myhandler))
 	/*
 		app.Handle("/{name}", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			vars := mux.Vars(r)
