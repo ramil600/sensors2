@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"log"
+	"os"
 	"testing"
 	"time"
 
@@ -18,10 +19,10 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 	core = NewCore(dbc)
-	m.Run()
+	os.Exit(m.Run())
 }
 
-func TestCreate(t *testing.T) {
+func TestCoreCreate(t *testing.T) {
 
 	now := time.Now()
 
