@@ -13,27 +13,27 @@ type Store struct {
 }
 
 // NewStore creates new Store with db connection pool
-func NewStore(db *sqlx.DB) *Store {
-	return &Store{
+func NewStore(db *sqlx.DB) Store {
+	return Store{
 		DB: db,
 	}
 }
 
 // Create inserts a new user and logs the user_id created
-func (s Store) Create(ctx context.Context, nu NewUser) error {
-	nu.ID = uuid.NewString()
+func (s Store) Create(ctx context.Context, u User) error {
+	u.ID = uuid.NewString()
 
 	const query = `INSERT INTO users (user_id, name, email, roles, password_hash,
 		date_created, date_updated) VALUES(:user_id,:name,:email,:roles,:password_hash,
 			:date_created, :date_updated) RETURNING user_id`
 	const queryid = `SELECT user_id FROM users WHERE email=$1`
 
-	_, err := s.DB.NamedExecContext(ctx, query, nu)
+	_, err := s.DB.NamedExecContext(ctx, query, u)
 	if err != nil {
 		return err
 	}
 	var userId string
-	err = s.DB.QueryRowContext(ctx, queryid, nu.Email).Scan(&userId)
+	err = s.DB.QueryRowContext(ctx, queryid, u.Email).Scan(&userId)
 	if err != nil {
 		return err
 	}

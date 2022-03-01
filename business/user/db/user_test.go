@@ -12,11 +12,11 @@ import (
 
 func TestCreate(t *testing.T) {
 
-	nu := db.NewUser{
-		Name:         "Ramil Mirhasanov",
-		Email:        "s@s.com",
+	usr := db.User{
+		Name:         "Ramil Mirnov",
+		Email:        "s@s1.com",
 		Roles:        pq.StringArray([]string{"admin"}),
-		PasswordHash: "hello",
+		PasswordHash: []byte("hello"),
 		DateCreated:  time.Now(),
 		DateUpdated:  time.Now(),
 	}
@@ -29,7 +29,7 @@ func TestCreate(t *testing.T) {
 		t.Fatal(err)
 	}
 	store := db.NewStore(dbconn)
-	err = store.Create(ctx, nu)
+	err = store.Create(ctx, usr)
 	if err != nil {
 		t.Fatal(err)
 	}
