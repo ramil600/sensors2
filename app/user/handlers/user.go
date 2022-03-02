@@ -13,11 +13,13 @@ import (
 
 type User struct {
 	Core user.Core
+	Log  *log.Logger
 }
 
-func NewUser(db *sqlx.DB) User {
+func NewUser(db *sqlx.DB, log *log.Logger) User {
 	usr := User{
 		Core: user.NewCore(db),
+		Log:  log,
 	}
 	return usr
 }
@@ -30,12 +32,14 @@ func (u User) Create(ctx context.Context, w http.ResponseWriter, r *http.Request
 	var nu user.NewUser
 
 	if err := Decode(r, &nu); err != nil {
-		log.Fatal(err)
+		u.Log.Fatal(err)
 	}
 
 	dbUser, err := u.Core.Create(ctx, nu, time.Now())
 	if err != nil {
+		u.Log.Println(err)
 		Encode(w, dbUser, http.StatusInternalServerError)
+		return
 	}
 
 	Encode(w, dbUser, http.StatusCreated)

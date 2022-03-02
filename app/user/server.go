@@ -38,10 +38,13 @@ func main() {
 		log.Fatal("could not ping db conn: ", err)
 	}
 
+	//New logger setup
+	log := log.New(os.Stdout, "USER: ", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
+
 	//Construct your server here
 	s := &http.Server{
 		Addr:    SERVER_ADDR,
-		Handler: handlers.API(db), //custom built struct with mux, logger and middleware
+		Handler: handlers.API(db, log), //custom built struct with mux, logger and middleware
 	}
 	// Put server in the go routine so that we can catch error from it or signal
 	// to terminate lower in select structure
