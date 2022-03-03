@@ -38,7 +38,10 @@ func (u User) Create(ctx context.Context, w http.ResponseWriter, r *http.Request
 	dbUser, err := u.Core.Create(ctx, nu, time.Now())
 	if err != nil {
 		u.Log.Println(err)
-		Encode(w, dbUser, http.StatusInternalServerError)
+		erresponse := ErrorResponse{
+			Error: err.Error(),
+		}
+		Encode(w, erresponse, http.StatusInternalServerError)
 		return
 	}
 
