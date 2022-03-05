@@ -51,3 +51,7 @@ func (c Core) Create(ctx context.Context, nu NewUser, now time.Time) (db.User, e
 	return dbUsr, err
 
 }
+
+func (c Core) Update(ctx context.Context, updUsr UserUpdate, now time.Time) (db.User, error) {
+
+}

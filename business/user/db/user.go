@@ -2,12 +2,15 @@ package db
 
 import (
 	"context"
-	"log"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
+var errDbNotFound = errors.New("not found")
+
+// Store is encapsulation for db connection
 type Store struct {
 	DB *sqlx.DB
 }
@@ -37,8 +40,42 @@ func (s Store) Create(ctx context.Context, u User) error {
 	if err != nil {
 		return err
 	}
-	log.Println("Id of created user: ", userId)
-
 	return nil
 
+}
+
+func (s Store) Update(ctx context.Context, upd User) error {
+
+	const q = `UPDATE users set name=:name, email=:email,
+	roles=:roles, password_hash=:password_hash, date_updated=:date_updated
+	WHERE user_id=:user_id`
+
+	_, err := s.DB.NamedExecContext(ctx, q, upd)
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+func (s Store) Query(ctx context.Context, user_id string) (User, error) {
+	const q = `SELECT * FROM users WHERE user_id=:user_id`
+	var usr = User{
+		ID: user_id,
+	}
+
+	rows, err := s.DB.NamedQueryContext(ctx, q, usr)
+	if err != nil {
+		return User{}, err
+	}
+
+	if !rows.Next() {
+		return User{}, errDbNotFound
+	}
+	err = rows.StructScan(&usr)
+	if err != nil {
+		return User{}, errDbNotFound
+	}
+
+	return usr, nil
 }
