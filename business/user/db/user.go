@@ -88,3 +88,20 @@ func (s Store) QueryById(ctx context.Context, user_id string) (User, error) {
 
 	return usr1, nil
 }
+
+func (s Store) Delete(ctx context.Context, id string) error {
+	const q = `DELETE FROM users WHERE "user_id"=:user_id`
+
+	usrDel := struct {
+		ID string `db:"user_id"`
+	}{
+		ID: id,
+	}
+
+	_, err := s.DB.NamedExecContext(ctx, q, usrDel)
+	if err != nil {
+		return err
+	}
+	return nil
+
+}

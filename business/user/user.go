@@ -68,6 +68,9 @@ func (c Core) Update(ctx context.Context, updUsr UserUpdate, user_id string, now
 		dbUsr.Name = *updUsr.Name
 	}
 	if updUsr.Email != nil {
+		if _, err := mail.ParseAddress(*updUsr.Email); err != nil {
+			return db.User{}, fmt.Errorf("email validation failed: %s", err)
+		}
 		dbUsr.Email = *updUsr.Email
 	}
 	if updUsr.Roles != nil {
@@ -91,5 +94,15 @@ func (c Core) Update(ctx context.Context, updUsr UserUpdate, user_id string, now
 		return db.User{}, err
 	}
 	return dbUsr, nil
+
+}
+
+func (c Core) Delete(ctx context.Context, id string) error {
+
+	if _, err := uuid.Parse(id); err != nil {
+		return err
+	}
+
+	return c.store.Delete(ctx, id)
 
 }

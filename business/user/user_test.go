@@ -58,6 +58,7 @@ func TestUpdate(t *testing.T) {
 	roles := []string{"admin", "user"}
 	pwd := "password"
 	pwdConfirm := "password"
+
 	upd := UserUpdate{
 		Name:            &name,
 		Roles:           roles,
@@ -85,4 +86,23 @@ func TestUpdate(t *testing.T) {
 		t.Fatal(err)
 	}
 
+}
+
+func TestDelete(t *testing.T) {
+	rows, err := core.store.DB.Query("SELECT user_id FROM users WHERE email=$1", Email)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !rows.Next() {
+		t.Fatal(rows.Err())
+	}
+	var userId string
+	err = rows.Scan(&userId)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = core.Delete(context.TODO(), userId)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
