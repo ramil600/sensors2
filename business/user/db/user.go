@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -46,9 +47,13 @@ func (s Store) Create(ctx context.Context, u User) error {
 
 func (s Store) Update(ctx context.Context, upd User) error {
 
-	const q = `UPDATE users set name=:name, email=:email,
-	roles=:roles, password_hash=:password_hash, date_updated=:date_updated
-	WHERE user_id=:user_id`
+	const q = `UPDATE users SET
+	"name"=:name, 
+	"email"=:email,
+	"roles"=:roles,
+	"password_hash"=:password_hash,
+	"date_updated"=:date_updated
+	WHERE "user_id"=:user_id`
 
 	_, err := s.DB.NamedExecContext(ctx, q, upd)
 	if err != nil {
@@ -58,24 +63,28 @@ func (s Store) Update(ctx context.Context, upd User) error {
 
 }
 
-func (s Store) Query(ctx context.Context, user_id string) (User, error) {
-	const q = `SELECT * FROM users WHERE user_id=:user_id`
-	var usr = User{
+func (s Store) QueryById(ctx context.Context, user_id string) (User, error) {
+	const q = `SELECT * FROM users WHERE "user_id"=:user_id`
+
+	var usr = struct {
+		ID string `db:"user_id"`
+	}{
 		ID: user_id,
 	}
+	var usr1 User
 
 	rows, err := s.DB.NamedQueryContext(ctx, q, usr)
 	if err != nil {
-		return User{}, err
+		return User{}, errors.New(fmt.Sprint("couldn't parse query", err))
 	}
 
 	if !rows.Next() {
 		return User{}, errDbNotFound
 	}
-	err = rows.StructScan(&usr)
+	err = rows.StructScan(&usr1)
 	if err != nil {
 		return User{}, errDbNotFound
 	}
 
-	return usr, nil
+	return usr1, nil
 }

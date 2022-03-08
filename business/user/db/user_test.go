@@ -46,7 +46,7 @@ func TestCreate(t *testing.T) {
 
 }
 
-func TestQuery(t *testing.T) {
+func TestQueryById(t *testing.T) {
 
 	q := `SELECT user_id from users WHERE email=$1`
 
@@ -56,7 +56,7 @@ func TestQuery(t *testing.T) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
-	usr, err := store.Query(ctx, usr.ID)
+	usr, err := store.QueryById(ctx, usr.ID)
 	if err != nil {
 		t.Fatal(err)
 	}

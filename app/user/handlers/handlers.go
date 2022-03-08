@@ -12,5 +12,6 @@ func API(db *sqlx.DB, log *log.Logger) *web.App {
 
 	user := NewUser(db, log)
 	app.Handle("/user/create", user.Create)
+	app.Handle("/user/update/{id}", user.Update)
 	return app
 }

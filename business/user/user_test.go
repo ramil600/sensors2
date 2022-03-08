@@ -12,6 +12,7 @@ import (
 )
 
 var core Core
+var Email = "ramil@yahoo.com"
 
 func TestMain(m *testing.M) {
 	dbc, err := db.Open(db.DBcfg)
@@ -28,7 +29,7 @@ func TestCoreCreate(t *testing.T) {
 
 	nu := NewUser{
 		Name:            "ramil",
-		Email:           "ramil@yahoo.com",
+		Email:           Email,
 		Roles:           []string{"admin"},
 		Password:        "ramil",
 		PasswordConfirm: "ramil",
@@ -48,6 +49,40 @@ func TestCoreCreate(t *testing.T) {
 	if dbUsr.DateCreated != now || dbUsr.DateUpdated != now {
 		t.Log("Date created or updated mismatch")
 		t.Fail()
+	}
+
+}
+
+func TestUpdate(t *testing.T) {
+	name := "Some New Name"
+	roles := []string{"admin", "user"}
+	pwd := "password"
+	pwdConfirm := "password"
+	upd := UserUpdate{
+		Name:            &name,
+		Roles:           roles,
+		Password:        &pwd,
+		PasswordConfirm: &pwdConfirm,
+	}
+	rows, err := core.store.DB.Query("Select user_id from users where email=$1", Email)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !rows.Next() {
+		t.Fatal(rows.Err())
+	}
+	var user_id string
+	rows.Scan(&user_id)
+	dbUsr, err := core.Update(context.TODO(), upd, user_id, time.Now())
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if dbUsr.Name != name {
+		t.Log("Name returned is not what is expected")
+		t.Fatal(err)
 	}
 
 }

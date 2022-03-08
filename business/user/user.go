@@ -2,12 +2,15 @@ package user
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log"
 	"net/mail"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	"github.com/ramil600/sensors2/business/user/db"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -22,6 +25,7 @@ func NewCore(dbconn *sqlx.DB) Core {
 	}
 }
 
+// Create core user given update time and NewUser struct with fields to update, returns updated db.User
 func (c Core) Create(ctx context.Context, nu NewUser, now time.Time) (db.User, error) {
 
 	if nu.Password != nu.PasswordConfirm {
@@ -52,6 +56,40 @@ func (c Core) Create(ctx context.Context, nu NewUser, now time.Time) (db.User, e
 
 }
 
-func (c Core) Update(ctx context.Context, updUsr UserUpdate, now time.Time) (db.User, error) {
+// Update core user given user id, update time and updUsr struct with fields to update, returns updated db.User
+func (c Core) Update(ctx context.Context, updUsr UserUpdate, user_id string, now time.Time) (db.User, error) {
+
+	dbUsr, err := c.store.QueryById(ctx, user_id)
+	log.Println(dbUsr)
+	if err != nil {
+		return db.User{}, err
+	}
+	if updUsr.Name != nil {
+		dbUsr.Name = *updUsr.Name
+	}
+	if updUsr.Email != nil {
+		dbUsr.Email = *updUsr.Email
+	}
+	if updUsr.Roles != nil {
+		dbUsr.Roles = make(pq.StringArray, len(updUsr.Roles))
+		copy(dbUsr.Roles, updUsr.Roles)
+	}
+	if updUsr.Password != nil {
+		if *updUsr.Password != *updUsr.PasswordConfirm {
+			return db.User{}, errors.New("user passwords are not equal")
+		}
+		pwdhash, err := bcrypt.GenerateFromPassword([]byte(*updUsr.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return db.User{}, err
+		}
+		dbUsr.PasswordHash = pwdhash
+
+	}
+	dbUsr.DateUpdated = now
+	err = c.store.Update(ctx, dbUsr)
+	if err != nil {
+		return db.User{}, err
+	}
+	return dbUsr, nil
 
 }
