@@ -69,3 +69,18 @@ func (u User) Update(ctx context.Context, w http.ResponseWriter, r *http.Request
 	Encode(w, nil, http.StatusNoContent)
 
 }
+
+func (u User) UserReturn(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+
+	user_id := Params(r, "id")
+	usr, err := u.Core.Return(ctx, user_id)
+	if err != nil {
+		erreponse := ErrorResponse{
+			Error: err.Error(),
+		}
+		Encode(w, erreponse, http.StatusInternalServerError)
+		return
+	}
+	Encode(w, usr, http.StatusOK)
+
+}

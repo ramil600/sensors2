@@ -106,3 +106,25 @@ func (c Core) Delete(ctx context.Context, id string) error {
 	return c.store.Delete(ctx, id)
 
 }
+
+func (c Core) Return(ctx context.Context, id string) (User, error) {
+
+	_, err := uuid.Parse(id)
+	if err != nil {
+		return User{}, err
+
+	}
+
+	dbusr, err := c.store.QueryById(ctx, id)
+	if err != nil {
+		return User{}, err
+	}
+	coreUser := User{
+		Name:  dbusr.Name,
+		Email: dbusr.Email,
+		Roles: dbusr.Roles,
+	}
+
+	return coreUser, nil
+
+}

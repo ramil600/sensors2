@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -77,6 +78,7 @@ func (s Store) QueryById(ctx context.Context, user_id string) (User, error) {
 	if err != nil {
 		return User{}, errors.New(fmt.Sprint("couldn't parse query", err))
 	}
+	defer rows.Close()
 
 	if !rows.Next() {
 		return User{}, errDbNotFound
@@ -87,6 +89,39 @@ func (s Store) QueryById(ctx context.Context, user_id string) (User, error) {
 	}
 
 	return usr1, nil
+}
+
+// QuerySlice uses reflection to populate the slice of objects dest using
+// query and struct with db tags
+func (s Store) QuerySlice(ctx context.Context, query string, data interface{}, dest interface{}) error {
+	val := reflect.ValueOf(dest)
+
+	if val.Kind() != reflect.Ptr || val.Elem().Kind() != reflect.Slice {
+		return errors.New("wrong data type slice is expected")
+	}
+
+	rows, err := s.DB.NamedQueryContext(ctx, query, data)
+	if err != nil {
+		return errors.New(fmt.Sprint("couldn't parse query", err))
+	}
+	defer rows.Close()
+	// Get the slice from reflect pointer
+	slice := val.Elem()
+
+	for rows.Next() {
+		// create new object of the type of the slice element
+		elm := reflect.New(slice.Type().Elem())
+
+		// reflect.Value extract interface
+		if err = rows.StructScan(elm.Interface()); err != nil {
+			return err
+		}
+		//use Set otherwise the interface object behind Value will not be updated
+		slice.Set(reflect.Append(slice, elm.Elem()))
+
+	}
+	return nil
+
 }
 
 func (s Store) Delete(ctx context.Context, id string) error {

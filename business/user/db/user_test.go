@@ -28,10 +28,10 @@ func TestMain(m *testing.M) {
 func TestCreate(t *testing.T) {
 
 	usr = User{
-		Name:         "Ramil Mirnov",
-		Email:        "s@s1.com",
-		Roles:        pq.StringArray([]string{"admin"}),
-		PasswordHash: []byte("hello"),
+		Name:         "Ramil Mirhasnov",
+		Email:        "s@s2.com",
+		Roles:        pq.StringArray([]string{"admin", "user"}),
+		PasswordHash: []byte("hello123"),
 		DateCreated:  time.Now(),
 		DateUpdated:  time.Now(),
 	}
@@ -65,5 +65,19 @@ func TestQueryById(t *testing.T) {
 	if usr.Name == "" {
 		t.Error("User not found")
 	}
+}
+
+func TestQuerySlice(t *testing.T) {
+
+	data := User{
+		Roles: pq.StringArray([]string{"admin"}),
+	}
+	var users []User
+	query := `SELECT * FROM users
+			where :roles <@ roles`
+	if err := store.QuerySlice(context.TODO(), query, data, &users); err != nil {
+		t.Fatal(err)
+	}
+	t.Log("Total users retrived by QuerySlice:", len(users))
 
 }
