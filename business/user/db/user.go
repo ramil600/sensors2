@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/ramil600/sensors2/foundation/database"
 )
 
 var errDbNotFound = errors.New("not found")
@@ -91,8 +92,8 @@ func (s Store) QueryById(ctx context.Context, user_id string) (User, error) {
 	return usr1, nil
 }
 
-// QuerySlice uses reflection to populate the slice of objects dest using
-// query and struct with db tags
+// QuerySlice uses reflection to populate the slice of objects to dest using
+// query and struct data with named parameters(db tags)
 func (s Store) QuerySlice(ctx context.Context, query string, data interface{}, dest interface{}) error {
 	val := reflect.ValueOf(dest)
 
@@ -124,19 +125,37 @@ func (s Store) QuerySlice(ctx context.Context, query string, data interface{}, d
 
 }
 
-func (s Store) Delete(ctx context.Context, id string) error {
-	const q = `DELETE FROM users WHERE "user_id"=:user_id`
+// Delete user by user id
+func (s Store) Delete(ctx context.Context, userId string) error {
 
+	const q = `DELETE FROM users WHERE "user_id"=:user_id`
 	usrDel := struct {
 		ID string `db:"user_id"`
 	}{
-		ID: id,
+		ID: userId,
 	}
-
 	_, err := s.DB.NamedExecContext(ctx, q, usrDel)
 	if err != nil {
 		return err
 	}
 	return nil
+}
 
+// BatchInsertUser allows to insert the multiple users in a batch, rolling back if any insertion fails
+func (s Store) BatchInsertUser(ctx context.Context, users []User) error {
+
+	const query = `INSERT INTO users (user_id, name, email, roles, password_hash,
+		date_created, date_updated) VALUES(:user_id,:name,:email,:roles,:password_hash,
+			:date_created, :date_updated) RETURNING user_id`
+
+	fn := func(db sqlx.ExtContext) error {
+		for u := range users {
+			if _, err := sqlx.NamedExecContext(ctx, db, query, u); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	return database.Transact(s.DB, fn)
 }

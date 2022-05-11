@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
@@ -38,12 +39,12 @@ func NewApp(mws ...Middleware) *App {
 
 // Handle adds trace info and allows mux to route the traffic with modified context
 func (a App) Handle(path string, handler Handler) {
-
 	handler = WrapMiddleware(a.mw, handler)
 
+	//wrap with context and convert from our Handler to http.Handler
 	h := func(w http.ResponseWriter, r *http.Request) {
-
-		ctx := context.WithValue(r.Context(), Mytrace, "we345-wder23-ewe32")
+		startTrace := uuid.New().String()
+		ctx := context.WithValue(r.Context(), Mytrace, startTrace)
 		handler(ctx, w, r)
 	}
 	a.mux.HandleFunc(path, h)

@@ -1,6 +1,6 @@
 build:
 	go build -o app/user ./...
 postgres: 
-	docker run --name postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres
+	docker run --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=postgres  -d postgres
 admin:
 	go build -o app/admin ./...
