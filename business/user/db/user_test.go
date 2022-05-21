@@ -2,16 +2,19 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/lib/pq"
+	"github.com/ramil600/sensors2/foundation/docker"
 )
 
 var usr User
 var store Store
+var c *docker.Container
 
 func TestMain(m *testing.M) {
 
@@ -21,6 +24,15 @@ func TestMain(m *testing.M) {
 	}
 	defer dbconn.Close()
 	store = NewStore(dbconn)
+	args := []string{"-e", "POSTGRES_PASSWORD=postgres"}
+
+	c, err := docker.StartContainer("postgres", "5432", args...)
+	if err != nil {
+		log.Fatal(err, "something wrong here")
+	}
+	defer docker.StopContainer(c.Id)
+
+	fmt.Println(c.Host, c.Id)
 
 	os.Exit(m.Run())
 
@@ -79,5 +91,35 @@ func TestQuerySlice(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log("Total users retrived by QuerySlice:", len(users))
+
+}
+
+func TestBatchInsertUser(t *testing.T) {
+
+	usrs := []User{{
+		Name:         "Ramil Mirhasnov",
+		Email:        "s@s2.com",
+		Roles:        pq.StringArray([]string{"admin", "user"}),
+		PasswordHash: []byte("hello123"),
+		DateCreated:  time.Now(),
+		DateUpdated:  time.Now(),
+	},
+		{
+			Name:         "Emin",
+			Email:        "s@s3.com",
+			Roles:        pq.StringArray([]string{"admin", "user"}),
+			PasswordHash: []byte("hello123"),
+			DateCreated:  time.Now(),
+			DateUpdated:  time.Now(),
+		}}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+
+	err := store.BatchInsertUser(ctx, usrs)
+
+	if err != nil {
+		t.Fatal(err)
+	}
 
 }

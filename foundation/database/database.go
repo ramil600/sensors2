@@ -8,11 +8,14 @@ func Transact(db *sqlx.DB, fn func(sqlx.ExtContext) error) error {
 		return err
 	}
 	defer func() {
-		if p := recover(); p != nil {
-			tx.Rollback()
-			// rethrow panic after rolling back
-			panic(p)
-		} else if err != nil {
+		/*
+			if p := recover(); p != nil {
+				tx.Rollback()
+				// rethrow panic after rolling back
+				panic(p)
+			} else
+		*/
+		if err != nil {
 			tx.Rollback()
 		}
 	}()

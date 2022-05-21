@@ -149,13 +149,12 @@ func (s Store) BatchInsertUser(ctx context.Context, users []User) error {
 			:date_created, :date_updated) RETURNING user_id`
 
 	fn := func(db sqlx.ExtContext) error {
-		for u := range users {
+		for _, u := range users {
 			if _, err := sqlx.NamedExecContext(ctx, db, query, u); err != nil {
 				return err
 			}
 		}
 		return nil
 	}
-
 	return database.Transact(s.DB, fn)
 }

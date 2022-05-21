@@ -1,0 +1,19 @@
+FROM golang:1.17 as build_sensors
+ENV CGO_ENABLED 0
+
+RUN mkdir /sensors
+COPY go.* /sensors/
+WORKDIR /sensors
+RUN go mod download
+
+COPY . /sensors
+
+RUN go build /sensors/app/user
+
+FROM alpine:latest
+
+COPY --from=build_sensors  /sensors/user /app/user
+
+WORKDIR /app
+
+CMD ["./user"]
