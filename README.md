@@ -1,2 +1,3 @@
-# sensors2
-REST microservices written on Go, PostgreSQL 
+Sensors REST API with PostgreSQL
+================================
+REST microservices written in Go, PostgreSQL 
